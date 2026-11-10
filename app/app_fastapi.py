@@ -125,5 +125,12 @@ def delete_todo(todo_id: int):
     todos = [t for t in todos if t['id'] != todo_id]
     return None
 
+@app.post("/api/reset", status_code=201)
+def reset_todos():
+    global todos, next_id
+    todos = []
+    next_id = 1
+    return {"message": "Todos reset successfully"}
+
 if __name__ == '__main__':
     uvicorn.run(app, host="127.0.0.1", port=5000)

@@ -20,6 +20,18 @@ def test_add_todo(page: Page):
     expect(items).to_have_count(before + 1)
     expect(items.last).to_contain_text("Buy milk")
 
+def test_create_todo(api: APIRequestContext): # test for the api
+    api.post("/api/reset")
+    response = api.post("/api/todos", data={"text": "Learn API Testing"})
+    
+    # Verify the request was successful (Status 200/201)
+    expect(response).to_be_ok()
+    
+    # Verify the server returned the created object properly
+    data = response.json()
+    assert data["text"] == "Learn API Testing"
+    assert data["completed"] is False
+
 
 # 2. Test adding an empty task (should not be added)
 def test_add_empty_todo(page: Page):
