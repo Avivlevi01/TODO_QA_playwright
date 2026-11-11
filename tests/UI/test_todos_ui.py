@@ -1,3 +1,4 @@
+import pytest
 from playwright.sync_api import Page, expect
 
 # Helper function to avoid code duplication
@@ -13,27 +14,19 @@ def open_and_count(page: Page) -> int:
     return already
 
 # 1. Test adding a new task
+@pytest.mark.ui
 def test_add_todo(page: Page):
     before = open_and_count(page)
     add_todo(page, "Buy milk")
     items = page.get_by_test_id("todo-item")
     expect(items).to_have_count(before + 1)
     expect(items.last).to_contain_text("Buy milk")
-
-def test_create_todo(api: APIRequestContext): # test for the api
-    api.post("/api/reset")
-    response = api.post("/api/todos", data={"text": "Learn API Testing"})
+    # expect(page.get_by_test_id("todo-item")).to_contain_text("Buy bread") 
     
-    # Verify the request was successful (Status 200/201)
-    expect(response).to_be_ok()
-    
-    # Verify the server returned the created object properly
-    data = response.json()
-    assert data["text"] == "Learn API Testing"
-    assert data["completed"] is False
 
 
 # 2. Test adding an empty task (should not be added)
+@pytest.mark.ui
 def test_add_empty_todo(page: Page):
     before = open_and_count(page)
     add_todo(page, "")
@@ -41,6 +34,7 @@ def test_add_empty_todo(page: Page):
 
 
 # 3. Test marking a task as completed #########################################################
+@pytest.mark.ui
 def test_complete_todo(page: Page):
     before = open_and_count(page)
     add_todo(page, "Do homework")
@@ -52,6 +46,7 @@ def test_complete_todo(page: Page):
 
 
 # 4. Test deleting a task
+@pytest.mark.ui
 def test_delete_todo(page: Page):
     before = open_and_count(page)
     add_todo(page, "Take out the trash")
@@ -63,6 +58,7 @@ def test_delete_todo(page: Page):
 
 
 # 5. Test adding multiple tasks
+@pytest.mark.ui
 def test_add_multiple_todos(page: Page):
     before = open_and_count(page)
     add_todo(page, "Task 1")

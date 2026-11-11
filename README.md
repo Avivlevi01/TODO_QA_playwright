@@ -1,5 +1,7 @@
 # QA Automation Portfolio Project: Todo App
 
+[![Automated Tests](https://github.com/Avivlevi01/TODO_QA_playwright/actions/workflows/tests.yml/badge.svg)](https://github.com/Avivlevi01/TODO_QA_playwright/actions)
+
 End-to-end UI and API test suite for a small todo app, built with Playwright (Python) and pytest.
 
 ## 🎯 What is Tested

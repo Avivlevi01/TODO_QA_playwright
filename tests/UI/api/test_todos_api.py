@@ -1,8 +1,9 @@
 from playwright.sync_api import APIRequestContext, expect, Page
-
+import pytest
 from conftest import BASE_URL
 
 # 1. Create (POST) - Test adding a new todo
+@pytest.mark.api
 def test_create_todo(api: APIRequestContext):
     api.post("/api/reset")
     response = api.post("/api/todos", data={"text": "Learn API Testing"})
@@ -16,6 +17,7 @@ def test_create_todo(api: APIRequestContext):
     assert data["completed"] is False
 
 # 2. Read (GET) - Test fetching all todos
+@pytest.mark.api
 def test_get_todos(api: APIRequestContext):
     # Create one todo first to ensure the list isn't completely empty
     api.post("/api/reset")
@@ -30,6 +32,7 @@ def test_get_todos(api: APIRequestContext):
     assert len(todos) > 0
 
 # 3. Update (PATCH) - Test marking a todo as completed
+@pytest.mark.api
 def test_update_todo(api: APIRequestContext):
     # Create a todo to update
     api.post("/api/reset")
@@ -44,6 +47,7 @@ def test_update_todo(api: APIRequestContext):
     assert patch_res.json()["completed"] is True
 
 # 4. Delete (DELETE) - Test removing a todo
+@pytest.mark.api
 def test_delete_todo(api: APIRequestContext):
     # Create a todo to delete
     api.post("/api/reset")
@@ -61,6 +65,7 @@ def test_delete_todo(api: APIRequestContext):
     assert patch_res.status == 404
 
 # 5. Negative Test - Try to update a non-existent ID
+@pytest.mark.api
 def test_update_non_existent_todo(api: APIRequestContext):
     # ID 99999 does not exist
     api.post("/api/reset")
@@ -79,7 +84,7 @@ def reset_and_open(api: APIRequestContext, page: Page): # helper function for th
     # BASE_URL is the full address the api fixture already uses.
     page.goto(f"{BASE_URL}/")
 
-
+@pytest.mark.api
 def test_page_is_empty_after_reset(api: APIRequestContext, page: Page): # test for the ui and api
     # Pytest calls this because the name starts with test_.
     # The parameter names api and page make Pytest call those fixtures
@@ -88,6 +93,7 @@ def test_page_is_empty_after_reset(api: APIRequestContext, page: Page): # test f
     expect(page.get_by_test_id("todo-item")).to_have_count(0)
 
 
+@pytest.mark.api
 def test_add_in_ui_then_delete_in_api(api: APIRequestContext, page: Page): # test for the ui and api
     # Pytest calls this because the name starts with test_.
     # The names api and page make Pytest build both tools first.
@@ -110,3 +116,4 @@ def test_add_in_ui_then_delete_in_api(api: APIRequestContext, page: Page): # tes
     # The open tab keeps the old row until it loads the page again.
     page.reload()
     expect(page.get_by_test_id("todo-item")).to_have_count(0)
+
