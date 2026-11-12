@@ -35,8 +35,12 @@ HTML_TEMPLATE = """
     <ul id="todo-list"></ul>
 
     <script>
+        let listVersion = 0;
+
         async function fetchTodos() {
+            const version = ++listVersion;
             const res = await fetch('/api/todos');
+            if (version !== listVersion) return;
             const list = document.getElementById('todo-list');
             const error = document.getElementById('load-error');
             if (!res.ok) {
@@ -77,13 +81,14 @@ HTML_TEMPLATE = """
 
         async function addTodo() {
             const input = document.getElementById('new-todo');
-            if (!input.value.trim()) return;
+            const text = input.value.trim();
+            if (!text) return;
+            input.value = '';
             await fetch('/api/todos', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({text: input.value})
+                body: JSON.stringify({text})
             });
-            input.value = '';
             fetchTodos();
         }
 
