@@ -5,11 +5,11 @@ import uvicorn
 
 app = FastAPI()
 
-# שמירת הנתונים בזיכרון (יתאפס בכל פעם שהשרת יכבה)
+# In-memory storage. The list resets when the server stops.
 todos = []
 next_id = 1
 
-# מודל Pydantic לאימות הנתונים שנכנסים ב-POST
+# Pydantic model that validates the POST body
 class TodoCreate(BaseModel):
     text: str
 
@@ -31,13 +31,21 @@ HTML_TEMPLATE = """
         <input type="text" id="new-todo" data-testid="todo-input" placeholder="Add a new task...">
         <button onclick="addTodo()" data-testid="add-button">Add</button>
     </div>
+    <p id="load-error" data-testid="load-error" hidden>Could not load tasks.</p>
     <ul id="todo-list"></ul>
 
     <script>
         async function fetchTodos() {
             const res = await fetch('/api/todos');
-            const todos = await res.json();
             const list = document.getElementById('todo-list');
+            const error = document.getElementById('load-error');
+            if (!res.ok) {
+                list.innerHTML = '';
+                error.hidden = false;
+                return;
+            }
+            error.hidden = true;
+            const todos = await res.json();
             list.innerHTML = '';
             
             todos.forEach(todo => {
@@ -51,6 +59,7 @@ HTML_TEMPLATE = """
                 checkbox.onclick = () => toggleTodo(todo.id);
 
                 const span = document.createElement('span');
+                span.setAttribute('data-testid', 'todo-text');
                 span.innerText = todo.text;
                 if (todo.completed) span.className = 'completed';
 
@@ -68,7 +77,7 @@ HTML_TEMPLATE = """
 
         async function addTodo() {
             const input = document.getElementById('new-todo');
-            if (!input.value) return;
+            if (!input.value.trim()) return;
             await fetch('/api/todos', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -121,7 +130,7 @@ def update_todo(todo_id: int):
 @app.delete("/api/todos/{todo_id}", status_code=204)
 def delete_todo(todo_id: int):
     global todos
-    # יצירת הרשימה מחדש ללא הפריט שנמחק
+    # Rebuild the list without the deleted item
     todos = [t for t in todos if t['id'] != todo_id]
     return None
 

@@ -29,8 +29,11 @@ jobs:
 
     - name: Start FastAPI server in background
       run: |
-        python app/app.py &
+        python app/app_fastapi.py &
         sleep 3
-        
+
     - name: Run tests with pytest
       run: pytest
+
+    - name: Run UI tests in Firefox and WebKit
+      run: pytest -m ui --browser firefox --browser webkit

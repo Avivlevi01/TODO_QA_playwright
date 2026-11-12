@@ -1,6 +1,5 @@
 from playwright.sync_api import APIRequestContext, expect, Page
 import pytest
-from conftest import BASE_URL
 
 # 1. Create (POST) - Test adding a new todo
 @pytest.mark.api
@@ -75,29 +74,28 @@ def test_update_non_existent_todo(api: APIRequestContext):
     assert response.status == 404
 
 
-def reset_and_open(api: APIRequestContext, page: Page): # helper function for the tests
+def reset_and_open(api: APIRequestContext, page: Page, base_url: str): # helper function for the tests
     # This helper is not a test. Pytest never calls it on its own.
     # It runs only when a test function calls it.
     api.post("/api/reset")
-    # The page fixture has no base address unless you pass --base-url.
-    # The tab starts at about:blank, so goto("/") is an invalid URL.
-    # BASE_URL is the full address the api fixture already uses.
-    page.goto(f"{BASE_URL}/")
+    # base_url comes from pytest.ini. The tab starts at about:blank,
+    # so goto needs the full address.
+    page.goto(base_url)
 
 @pytest.mark.api
-def test_page_is_empty_after_reset(api: APIRequestContext, page: Page): # test for the ui and api
+def test_page_is_empty_after_reset(api: APIRequestContext, page: Page, base_url: str): # test for the ui and api
     # Pytest calls this because the name starts with test_.
-    # The parameter names api and page make Pytest call those fixtures
+    # The parameter names api, page, and base_url make Pytest call those fixtures
     # first, then pass the results into this function.
-    reset_and_open(api, page)
+    reset_and_open(api, page, base_url)
     expect(page.get_by_test_id("todo-item")).to_have_count(0)
 
 
 @pytest.mark.api
-def test_add_in_ui_then_delete_in_api(api: APIRequestContext, page: Page): # test for the ui and api
+def test_add_in_ui_then_delete_in_api(api: APIRequestContext, page: Page, base_url: str): # test for the ui and api
     # Pytest calls this because the name starts with test_.
-    # The names api and page make Pytest build both tools first.
-    reset_and_open(api, page)
+    # The names api, page, and base_url make Pytest build those tools first.
+    reset_and_open(api, page, base_url)
 
     page.get_by_test_id("todo-input").fill("Buy milk")
     page.get_by_test_id("add-button").click()
